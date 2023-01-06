@@ -61,14 +61,13 @@ class Items extends Component {
     await saveCustomer(customer);
 
     // update items state numberInStock
-    const updates = inventory.map((item) => {
-      item.numberInStock = item.numberInStock -item.numberOutStock;
-      item.numberOutStock = 0;
+    const updates = inventory.map((update) => {
+      update.numberInStock = update.numberInStock -update.numberOutStock;
+      update.numberOutStock = 0;
 
-      return item;
+      return update;
     });
 
-    console.log('updates',updates);
     updates.forEach(async(current) => {
       //await saveItem(obj);
       const obj = {};
@@ -81,7 +80,6 @@ class Items extends Component {
       obj.dailyRentalRate = current.dailyRentalRate;
 
       await saveItem(obj);
-      console.log('obj',obj);
 
       //this.setState({ items });
     })
