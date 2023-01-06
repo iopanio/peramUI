@@ -27,7 +27,7 @@ const NavBar = ({ user }) => {
           </NavLink>
 
           <NavLink className="nav-item nav-link" to="/customers">
-            Customers
+            Transactions
           </NavLink>
 
           {!user && (
