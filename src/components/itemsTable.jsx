@@ -5,13 +5,13 @@ import Table from "./common/table";
 import Like from "./common/like";
 import Counter from "./common/counter";
 
-class MoviesTable extends Component {
+class ItemsTable extends Component {
   columns = [
     {
       path: "title",
       label: "Item",
-      content: (movie) => (
-        <Link to={`/movies/${movie._id}`}>{movie.title}</Link>
+      content: (item) => (
+        <Link to={`/items/${item._id}`}>{item.title}</Link>
       ),
     },
     { path: "genre.name", label: "Category" },
@@ -23,24 +23,24 @@ class MoviesTable extends Component {
     {
       label: "My Cart",
       key: "checkout",
-      content: (movie) => (
+      content: (item) => (
         <div className="row">
           <div className="col-1">
-        <span className="badge m-2 badge-warning">{movie.numberOutStock}</span>
+        <span className="badge m-2 badge-warning">{item.numberOutStock}</span>
           </div>
           <div className="col">
             <button
-              onClick={() => this.props.onIncrement(movie)}
+              onClick={() => this.props.onIncrement(item)}
               className="btn btn-secondary btn-sm"
-              disabled={movie.numberInStock === 0 ? "disabled" : ""}
+              disabled={item.numberInStock === 0 ? "disabled" : ""}
             >
               +
             </button>
             <button
-              onClick={() => this.props.onDecrement(movie)}
+              onClick={() => this.props.onDecrement(item)}
               className="btn btn-secondary btn-sm m-2"
-              disabled={movie.numberOutStock > movie.numberInStock
-                        || movie.numberOutStock < 1
+              disabled={item.numberOutStock > item.numberInStock
+                        || item.numberOutStock < 1
                         ? "disabled" : ""}
             >
               -
@@ -54,8 +54,8 @@ class MoviesTable extends Component {
   likedColumns = [
     {
       key: "like",
-      content: (movie) => (
-        <Like liked={movie.liked} onClick={() => this.props.onLike(movie)} />
+      content: (item) => (
+        <Like liked={item.liked} onClick={() => this.props.onLike(item)} />
       ),
     }
   ];
@@ -63,9 +63,9 @@ class MoviesTable extends Component {
   deletedColumns = [
     {
       key: "delete",
-      content: (movie) => (
+      content: (item) => (
         <button
-          onClick={() => this.props.onDelete(movie)}
+          onClick={() => this.props.onDelete(item)}
           className="btn btn-danger btn-sm"
         >
           Delete
@@ -87,12 +87,12 @@ class MoviesTable extends Component {
   }
 
   render() {
-    const { user, movies, onSort, sortColumn } = this.props;
+    const { user, items, onSort, sortColumn } = this.props;
 
     return (
       <Table
         columns={this.columns}
-        data={movies}
+        data={items}
         sortColumn={sortColumn}
         onSort={onSort}
       />
@@ -100,4 +100,4 @@ class MoviesTable extends Component {
   }
 }
 
-export default MoviesTable;
+export default ItemsTable;

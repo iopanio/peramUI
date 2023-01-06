@@ -1,19 +1,19 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import MoviesTable from "./moviesTable";
+import ItemsTable from "./itemsTable";
 import ListGroup from "./common/listGroup";
 import Pagination from "./common/pagination";
-import { getMovies, deleteMovie, saveMovie } from "../services/movieService";
+import { getItems, deleteItem, saveItem } from "../services/itemService";
 import { getGenres } from "../services/genreService";
 import { saveCustomer } from "../services/customerService";
 import { paginate } from "../utilities/paginate";
 import _ from "lodash";
 import SearchBox from "./searchBox";
 
-class Movies extends Component {
+class Items extends Component {
   state = {
-    movies: [],
+    items: [],
     genres: [],
     currentPage: 1,
     pageSize: 4,
@@ -26,12 +26,12 @@ class Movies extends Component {
     const { data } = await getGenres();
     const genres = [{ _id: "", name: "All Category" }, ...data];
 
-    const { data: movies } = await getMovies();
-    this.setState({ movies, genres });
+    const { data: items } = await getItems();
+    this.setState({ items, genres });
   }
 
   handleCheckout = async (user) =>  {
-    const inventory = [...this.state.movies];
+    const inventory = [...this.state.items];
     const items = inventory.filter((i) => i.numberOutStock > 0);
 
     // extract title, numberOutStock from items
@@ -60,7 +60,7 @@ class Movies extends Component {
     console.log('checkout customer: ', customer);
     await saveCustomer(customer);
 
-    // update movies state numberInStock
+    // update items state numberInStock
     const updates = inventory.map((item) => {
       item.numberInStock = item.numberInStock -item.numberOutStock;
       item.numberOutStock = 0;
@@ -70,7 +70,7 @@ class Movies extends Component {
 
     console.log('updates',updates);
     updates.forEach(async(current) => {
-      //await saveMovie(obj);
+      //await saveItem(obj);
       const obj = {};
       obj._id = current._id;
       obj.title = current.title;
@@ -80,56 +80,56 @@ class Movies extends Component {
       obj.numberInStock = tmp.toString();
       obj.dailyRentalRate = current.dailyRentalRate;
 
-      await saveMovie(obj);
+      await saveItem(obj);
       console.log('obj',obj);
 
-      //this.setState({ movies });
+      //this.setState({ items });
     })
 
   }
 
-  handleIncrement = async (movie) => {
-    const movies = [...this.state.movies];
-    const index = movies.indexOf(movie);
-    movies[index] = { ...movies[index] };
-    movies[index].numberOutStock +=1;
-    this.setState({ movies });
+  handleIncrement = async (item) => {
+    const items = [...this.state.items];
+    const index = items.indexOf(item);
+    items[index] = { ...items[index] };
+    items[index].numberOutStock +=1;
+    this.setState({ items });
   }
 
-  handleDecrement = async (movie) => {
-    const movies = [...this.state.movies];
-    const index = movies.indexOf(movie);
-    movies[index] = { ...movies[index] };
-    movies[index].numberOutStock -=1;
-    this.setState({ movies });
+  handleDecrement = async (item) => {
+    const items = [...this.state.items];
+    const index = items.indexOf(item);
+    items[index] = { ...items[index] };
+    items[index].numberOutStock -=1;
+    this.setState({ items });
   }
 
-  handleDelete = async (movie) => {
-    if (movie.genre.name === "Default") {
-      toast.error("Can not delete a default movie.");
+  handleDelete = async (item) => {
+    if (item.genre.name === "Default") {
+      toast.error("Can not delete a default item.");
       return;
     }
 
-    const originalMovies = this.state.movies;
-    const movies = originalMovies.filter((m) => m._id !== movie._id);
-    this.setState({ movies });
+    const originalItems = this.state.items;
+    const items = originalItems.filter((m) => m._id !== item._id);
+    this.setState({ items });
 
     try {
-      await deleteMovie(movie._id);
+      await deleteItem(item._id);
     } catch (ex) {
       if (ex.response && ex.response.status === 404)
-        toast.error("This movie has already been deleted.");
+        toast.error("This item has already been deleted.");
 
-      this.setState({ movies: originalMovies });
+      this.setState({ items: originalItems });
     }
   };
 
-  handleLike = (movie) => {
-    const movies = [...this.state.movies];
-    const index = movies.indexOf(movie);
-    movies[index] = { ...movies[index] };
-    movies[index].liked = !movies[index].liked;
-    this.setState({ movies });
+  handleLike = (item) => {
+    const items = [...this.state.items];
+    const index = items.indexOf(item);
+    items[index] = { ...items[index] };
+    items[index].liked = !items[index].liked;
+    this.setState({ items });
   };
 
   handlePageChange = (page) => {
@@ -155,32 +155,32 @@ class Movies extends Component {
       sortColumn,
       selectedGenre,
       searchQuery,
-      movies: allMovies,
+      items: allItems,
     } = this.state;
 
-    let filtered = allMovies;
+    let filtered = allItems;
     if (searchQuery)
-      filtered = allMovies.filter((m) =>
+      filtered = allItems.filter((m) =>
         m.title.toLowerCase().startsWith(searchQuery.toLowerCase())
       );
     else if (selectedGenre && selectedGenre._id)
-      filtered = allMovies.filter((m) => m.genre._id === selectedGenre._id);
+      filtered = allItems.filter((m) => m.genre._id === selectedGenre._id);
 
     const sorted = _.orderBy(filtered, [sortColumn.path], [sortColumn.order]);
 
-    const movies = paginate(sorted, currentPage, pageSize);
+    const items = paginate(sorted, currentPage, pageSize);
 
-    return { totalCount: filtered.length, data: movies };
+    return { totalCount: filtered.length, data: items };
   };
 
   render() {
-    const { length: count } = this.state.movies;
+    const { length: count } = this.state.items;
     const { pageSize, currentPage, sortColumn, searchQuery } = this.state;
     const { user } = this.props;
 
-    //if (count === 0) return <p>There are no movies in the database.</p>;
+    //if (count === 0) return <p>There are no items in the database.</p>;
 
-    const { totalCount, data: movies } = this.getPagedData();
+    const { totalCount, data: items } = this.getPagedData();
 
     return (
       <div className="row">
@@ -194,11 +194,11 @@ class Movies extends Component {
         <div className="col">
           {user && user.isAdmin && (
             <Link
-              to="/movies/new"
+              to="/items/new"
               className="btn btn-primary"
               style={{ marginBottom: 20 }}
             >
-              New Movie
+              New Item
             </Link>
           )}
           {user && !user.isAdmin && (
@@ -215,9 +215,9 @@ class Movies extends Component {
             Showing <strong>{totalCount}</strong> items in the database.
           </p>
           <SearchBox value={searchQuery} onChange={this.handleSearch} />
-          <MoviesTable
+          <ItemsTable
             user={user}
-            movies={movies}
+            items={items}
             sortColumn={sortColumn}
             onLike={this.handleLike}
             onDelete={this.handleDelete}
@@ -237,4 +237,4 @@ class Movies extends Component {
   }
 }
 
-export default Movies;
+export default Items;
